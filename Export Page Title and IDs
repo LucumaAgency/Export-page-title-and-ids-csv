@@ -1,0 +1,35 @@
+<?php
+/**
+ * Plugin Name: Export Page Details
+ * Description: A plugin to export the titles and IDs of all pages into a CSV file.
+ */
+
+function export_page_details_to_csv() {
+    // Check if the request is for exporting pages
+    if (isset($_GET['export_pages'])) {
+        header('Content-Type: text/csv');
+        header('Content-Disposition: attachment; filename="page-details.csv"');
+        
+        $output = fopen('php://output', 'w');
+        
+        // CSV Column Headers
+        fputcsv($output, array('Page ID', 'Page Title'));
+        
+        $args = array(
+            'post_type' => 'page',
+            'post_status' => 'publish',
+            'posts_per_page' => -1,
+        );
+        $pages = get_posts($args);
+        
+        foreach ($pages as $page) {
+            fputcsv($output, array($page->ID, $page->post_title));
+        }
+        
+        fclose($output);
+        exit();
+    }
+}
+
+add_action('init', 'export_page_details_to_csv');
+?>
